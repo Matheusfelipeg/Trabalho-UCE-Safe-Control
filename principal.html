@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SafeControl · Gestão de EPI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        :root {
+            --bg:      #f0f4f8;
+            --surface: #ffffff;
+            --surface2:#e8f0f7;
+            --border:  #cfe0ef;
+            --accent:  #1565c0;
+            --accent-light: #1e88e5;
+            --accent-hover: #0d47a1;
+            --text:    #1a2a3a;
+            --muted:   #6b8caa;
+            --header-bg: #1565c0;
+            --sidebar-bg: #f7fafd;
+            --sidebar-w: 220px;
+            --glow: 0 2px 12px rgba(21,101,192,.18);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: 'Syne', sans-serif; min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── LAYOUT ── */
+        .app { display: block; min-height: 100vh; }
+
+        /* ── SIDEBAR ── */
+        .overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.35);
+            backdrop-filter: blur(3px); z-index: 90;
+            display: none;
+        }
+        .overlay.active { display: block; }
+
+        .sidebar {
+            position: fixed; top: 0; left: calc(-1 * var(--sidebar-w));
+            width: var(--sidebar-w); height: 100%;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column;
+            z-index: 100;
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            box-shadow: 4px 0 24px rgba(21,101,192,.12);
+        }
+        .sidebar.active { transform: translateX(var(--sidebar-w)); }
+
+        .sidebar-brand { padding: 1.2rem 1.2rem; border-bottom: 1px solid var(--border); }
+        .logo-text { font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: .78rem; color: var(--muted); }
+        .logo-text span { color: var(--muted); }
+        .close-btn { background: none; border: 1px solid var(--border); color: var(--muted); cursor: pointer; border-radius: 6px; width: 32px; height: 32px; display: grid; place-items: center; transition: all .2s; }
+        .close-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        .sidebar-nav { padding: 1rem .8rem; display: flex; flex-direction: column; gap: .2rem; flex: 1; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: .7rem;
+            padding: .75rem .9rem; border-radius: 8px; cursor: pointer;
+            font-size: .82rem; font-weight: 600; color: var(--muted);
+            border: 1px solid transparent;
+            transition: all .2s; text-decoration: none;
+        }
+        .nav-item svg { flex-shrink: 0; opacity: .6; transition: opacity .2s; }
+        .nav-item:hover { background: #e3edf7; color: var(--accent); }
+        .nav-item:hover svg { opacity: 1; }
+        .nav-item.active {
+            background: #ddeeff; color: var(--accent);
+            border-color: #b3d4f5; font-weight: 700;
+        }
+        .nav-item.active svg { opacity: 1; }
+
+        .sidebar-footer {
+            padding: .9rem 1.2rem; border-top: 1px solid var(--border);
+            font-family: 'DM Mono', monospace; font-size: .6rem; color: var(--muted);
+        }
+
+        /* ── MAIN ── */
+        .main-wrap { display: flex; flex-direction: column; min-height: 100vh; }
+
+        .menu-toggle { background: #fff; border: 1px solid var(--border); color: var(--accent); padding: 8px 10px; cursor: pointer; border-radius: 6px; display: grid; place-items: center; transition: all .2s; }
+        .menu-toggle:hover { border-color: var(--accent); background: #e8f0fb; box-shadow: var(--glow); }
+        .logo-text-header { font-weight: 800; letter-spacing: .08em; text-transform: uppercase; font-size: 1.05rem; color: #fff; }
+        .logo-text-header span { color: rgba(255,255,255,.75); }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            padding: 1.2rem 2rem;
+            background: var(--accent);
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 20;
+            box-shadow: 0 2px 12px rgba(21,101,192,.25);
+        }
+        .page-header h1 {
+            font-size: 1.45rem; font-weight: 800;
+            letter-spacing: .06em; text-transform: uppercase; color: #fff;
+        }
+        .header-right { display: flex; align-items: center; gap: 1.2rem; }
+        .status-bar {
+            display: flex; align-items: center; gap: .4rem;
+            font-family: 'DM Mono', monospace; font-size: .65rem;
+            color: rgba(255,255,255,.75);
+        }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #69f0ae; box-shadow: 0 0 6px #69f0ae; animation: blink 1.8s ease-in-out infinite; }
+        @keyframes blink { 0%,100%{opacity:1}50%{opacity:.3} }
+        .clock { font-family: 'DM Mono', monospace; font-size: .75rem; color: rgba(255,255,255,.8); }
+
+        /* ── CONTENT ── */
+        .content { padding: 1.6rem 2rem; display: flex; flex-direction: column; gap: 1.4rem; }
+
+        /* ── SECTIONS ── */
+        .content-section { display: none; flex-direction: column; gap: 1.4rem; animation: fadeUp .4s ease both; }
+        .content-section.active { display: flex; }
+        @keyframes fadeUp { from { transform: translateY(16px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* ── TITLE BAR ── */
+        .title-bar { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: .75rem; }
+        .title-bar h2 { font-size: 1.3rem; font-weight: 800; color: var(--accent); letter-spacing: -.01em; }
+        .subtitle { font-family: 'DM Mono', monospace; font-size: .68rem; color: var(--muted); letter-spacing: .06em; margin-top: .2rem; }
+
+        /* ── BOTÕES ── */
+        .actions { display: flex; gap: .6rem; }
+        .btn { font-family: 'Syne', sans-serif; font-size: .75rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; cursor: pointer; border-radius: 6px; padding: .5rem 1.1rem; transition: all .2s; border: none; }
+        .btn-ghost { background: #fff; border: 1px solid var(--border); color: var(--accent); }
+        .btn-ghost:hover { border-color: var(--accent); background: #e8f0fb; box-shadow: var(--glow); }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:hover { background: var(--accent-hover); box-shadow: var(--glow); }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; overflow: hidden;
+            box-shadow: 0 2px 10px rgba(21,101,192,.07);
+            transition: box-shadow .2s;
+        }
+        .card:hover { box-shadow: 0 4px 18px rgba(21,101,192,.13); }
+
+        .card-head {
+            display: flex; align-items: center; gap: .6rem;
+            padding: .85rem 1.3rem; border-bottom: 1px solid var(--border);
+            background: var(--surface2);
+        }
+        .card-head-icon {
+            width: 28px; height: 28px; border-radius: 7px;
+            background: #ddeeff; border: 1px solid #b3d4f5;
+            display: grid; place-items: center; flex-shrink: 0;
+            color: var(--accent);
+        }
+        .card-title {
+            font-family: 'DM Mono', monospace; font-size: .68rem;
+            color: var(--accent); letter-spacing: .1em; text-transform: uppercase; font-weight: 600;
+        }
+
+        /* ── FRAME ── */
+        .frame-wrap {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; overflow: hidden;
+            box-shadow: 0 4px 20px rgba(21,101,192,.1);
+        }
+        .frame-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: .75rem 1.3rem; border-bottom: 1px solid var(--border);
+            background: var(--surface2);
+        }
+        .frame-title { display: flex; align-items: center; gap: .55rem; font-size: .78rem; font-weight: 600; color: var(--accent); }
+        .traffic-lights { display: flex; gap: .4rem; }
+        .tl { width: 10px; height: 10px; border-radius: 50%; }
+        .tl-r { background: #ff5f57; } .tl-y { background: #ffbd2e; } .tl-g { background: #28c840; }
+
+        iframe.dash {
+            display: block; width: 100%;
+            height: calc(100vh - 160px); min-height: 540px; border: none;
+        }
+        .frame-wrap:fullscreen { width:100vw; height:100vh; border-radius:0; display:flex; flex-direction:column; }
+        .frame-wrap:fullscreen iframe.dash { height:100%; flex:1; }
+        .frame-wrap:-webkit-full-screen { width:100vw; height:100vh; border-radius:0; display:flex; flex-direction:column; }
+        .frame-wrap:-webkit-full-screen iframe.dash { height:100%; flex:1; }
+
+        /* ── FORMULÁRIOS ── */
+        .card-body { padding: 1.4rem 1.5rem; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.3rem; }
+        .full-width { grid-column: 1 / -1; }
+        .input-group { display: flex; flex-direction: column; gap: .5rem; }
+        label { font-family: 'DM Mono', monospace; font-size: .65rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+        input, select {
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 7px; padding: .8rem 1rem;
+            color: var(--text); font-family: 'DM Mono', monospace;
+            font-size: .82rem; outline: none; transition: .2s; width: 100%;
+        }
+        input:focus, select:focus { border-color: var(--accent-light); box-shadow: 0 0 0 3px rgba(30,136,229,.12); }
+        input::placeholder { color: var(--muted); }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand" style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="logo-text">SAFE<span>CONTROL</span></div>
+            <button class="close-btn" onclick="toggleMenu()" aria-label="Fechar menu">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M3 3L13 13M13 3L3 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-item active" onclick="showSection('dash', this)">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor"/>
+                    <rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".5"/>
+                    <rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".5"/>
+                    <rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".3"/>
+                </svg>
+                Dashboard
+            </div>
+            <div class="nav-item" onclick="showSection('func', this)">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                Funcionários
+            </div>
+            <div class="nav-item" onclick="showSection('epi', this)">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 2C5 2 3 4 3 7v1h10V7c0-3-2-5-5-5Z" stroke="currentColor" stroke-width="1.5"/>
+                    <rect x="2" y="8" width="12" height="3" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                Cadastrar EPI
+            </div>
+            <div class="nav-item" onclick="showSection('entrega', this)">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <rect x="1" y="4" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M11 6l2.5 1.5L11 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Cadastrar Entrega
+            </div>
+            <div class="nav-item" onclick="showSection('compra', this)">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M2 2h1.5l1 6h7l1-4H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="6.5" cy="13" r="1" fill="currentColor"/>
+                    <circle cx="11.5" cy="13" r="1" fill="currentColor"/>
+                </svg>
+                Cadastrar Compra
+            </div>
+        </nav>
+        <div class="sidebar-footer">SafeControl · Monitoramento Operacional</div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main-wrap">
+        <div class="page-header">
+            <div style="display:flex;align-items:center;gap:1rem;">
+                <button class="menu-toggle" onclick="toggleMenu()" aria-label="Abrir menu">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <div class="logo-text-header">SAFE<span>CONTROL</span></div>
+            </div>
+            <div class="header-right">
+                <div class="status-bar"><span class="status-dot"></span>AO VIVO</div>
+                <div class="clock" id="clock">00:00:00</div>
+            </div>
+        </div>
+
+        <div class="content">
+
+            <!-- DASHBOARD -->
+            <section id="dash" class="content-section active">
+                <div class="title-bar">
+                    <div>
+                        <h2>Painel de Controle</h2>
+                        <div class="subtitle">// SAFECONTROL · MONITORAMENTO OPERACIONAL · POWER BI</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-ghost" onclick="reloadBI()">↺ Atualizar</button>
+                        <button class="btn btn-primary" onclick="goFullscreen()">⤢ Tela cheia</button>
+                    </div>
+                </div>
+                <div class="frame-wrap" id="frameWrap">
+                    <div class="frame-header">
+                        <div class="frame-title">
+                            <span style="width:8px;height:8px;border-radius:50%;background:#28c840;display:inline-block;box-shadow:0 0 6px #28c840;"></span>
+                            Dashboard SafeControl · Power BI
+                        </div>
+                        <div class="traffic-lights">
+                            <span class="tl tl-r"></span><span class="tl tl-y"></span><span class="tl tl-g"></span>
+                        </div>
+                    </div>
+                    <iframe id="biFrame" class="dash"
+                        src="https://app.powerbi.com/reportEmbed?reportId=ec50f66d-eaa2-4605-9f41-37214c73aca4&autoAuth=true&ctid=b77ab646-8d8c-44f2-869f-4cd1ec54c61d"
+                        allowfullscreen="true"></iframe>
+                </div>
+            </section>
+
+            <!-- FUNCIONÁRIOS -->
+            <section id="func" class="content-section">
+                <div class="title-bar">
+                    <div>
+                        <h2>Cadastro de Funcionários</h2>
+                        <div class="subtitle"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <div class="card-head-icon">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        </div>
+                        <span class="card-title">Dados do Funcionário</span>
+                    </div>
+                    <div class="card-body">
+                        <form onsubmit="sendToSQL(event, 'Funcionarios')">
+                            <div class="grid-inputs">
+                                <div class="input-group full-width"><label>Nome Completo</label><input type="text" name="Nome" placeholder="Ex: João da Silva" required></div>
+                                <div class="input-group"><label>CPF</label><input type="text" name="CPF" placeholder="00000000000" maxlength="11"></div>
+                                <div class="input-group"><label>Cargo</label><input type="text" name="Cargo" placeholder="Ex: Operador"></div>
+                                <div class="input-group"><label>Setor</label><input type="text" name="Setor" placeholder="Ex: Produção"></div>
+                                <div class="input-group"><label>Data Admissão</label><input type="date" name="DataAdmissao"></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1.8rem; padding:1rem;">Cadastrar Usuário</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- EPI -->
+            <section id="epi" class="content-section">
+                <div class="title-bar">
+                    <div>
+                        <h2>Cadastro de EPI</h2>
+                        <div class="subtitle"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <div class="card-head-icon">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2C5 2 3 4 3 7v1h10V7c0-3-2-5-5-5Z" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="8" width="12" height="3" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+                        </div>
+                        <span class="card-title">Dados do Equipamento</span>
+                    </div>
+                    <div class="card-body">
+                        <form onsubmit="sendToSQL(event, 'EPIs')">
+                            <div class="grid-inputs">
+                                <div class="input-group full-width"><label>Nome do EPI</label><input type="text" name="NomeEPI" placeholder="Ex: Capacete de Segurança" required></div>
+                                <div class="input-group"><label>Certificado de Aprovação (CA)</label><input type="text" name="CA" placeholder="Ex: 12345"></div>
+                                <div class="input-group"><label>Validade (Meses)</label><input type="number" name="ValidadeMeses" placeholder="Ex: 24"></div>
+                                <div class="input-group"><label>Estoque Mínimo</label><input type="number" name="EstoqueMinimo" placeholder="Ex: 10"></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1.8rem; padding:1rem;">Cadastrar Equipamento</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ENTREGA -->
+            <section id="entrega" class="content-section">
+                <div class="title-bar">
+                    <div>
+                        <h2>Cadastrar Entrega</h2>
+                        <div class="subtitle"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <div class="card-head-icon">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="4" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 6l2.5 1.5L11 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <span class="card-title">Dados da Entrega</span>
+                    </div>
+                    <div class="card-body">
+                        <form onsubmit="sendToSQL(event, 'Entregas')">
+                            <div class="grid-inputs">
+                                <div class="input-group"><label>Nome Funcionário</label><input type="number" name="Func_ID" placeholder="Ex: João da Silva" required></div>
+                                <div class="input-group"><label>Nome EPI</label><input type="number" name="EPI_ID" placeholder="Ex: Capacete" required></div>
+                                <div class="input-group"><label>Quantidade</label><input type="number" name="Quantidade" placeholder="Ex: 2"></div>
+                                <div class="input-group"><label>Data da Entrega</label><input type="date" name="DataEntrega"></div>
+                                <div class="input-group full-width"><label>Observação</label><input type="text" name="Obs" placeholder="Ex: Substituição por desgaste"></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1.8rem; padding:1rem;">Registrar Entrega</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- COMPRA -->
+            <section id="compra" class="content-section">
+                <div class="title-bar">
+                    <div>
+                        <h2>Cadastrar Compra</h2>
+                        <div class="subtitle"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <div class="card-head-icon">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2 2h1.5l1 6h7l1-4H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6.5" cy="13" r="1" fill="currentColor"/><circle cx="11.5" cy="13" r="1" fill="currentColor"/></svg>
+                        </div>
+                        <span class="card-title">Dados da Compra</span>
+                    </div>
+                    <div class="card-body">
+                        <form onsubmit="sendToSQL(event, 'Compras')">
+                            <div class="grid-inputs">
+                                <div class="input-group full-width"><label>Nome do EPI</label><input type="number" name="EPI_ID" placeholder="" required></div>
+                                <div class="input-group"><label>Número do Lote</label><input type="text" name="NumeroLote" placeholder="Ex: LOTE-2024-001"></div>
+                                <div class="input-group"><label>Quantidade</label><input type="number" name="Quantidade" placeholder="Ex: 3"></div>
+                                <div class="input-group"><label>Data de Fabricação</label><input type="date" name="DataFabricacao"></div>
+                                <div class="input-group"><label>Vencimento do Lote</label><input type="date" name="DataValidade"></div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:1.8rem; padding:1rem;">Confirmar Compra</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const titles = {
+        dash: 'Painel de Controle',
+        func: 'Cadastro de Funcionários',
+        epi: 'Cadastro de EPI',
+        entrega: 'Cadastrar Entrega',
+        compra: 'Cadastrar Compra'
+    };
+
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
+    }
+
+    function showSection(id, el) {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        el.classList.add('active');
+        // title update removed
+    }
+
+    function reloadBI() {
+        const f = document.getElementById('biFrame');
+        f.src = f.src;
+    }
+
+    function goFullscreen() {
+        const wrap = document.getElementById('frameWrap');
+        if (wrap.requestFullscreen) wrap.requestFullscreen();
+        else if (wrap.webkitRequestFullscreen) wrap.webkitRequestFullscreen();
+        else if (wrap.mozRequestFullScreen) wrap.mozRequestFullScreen();
+    }
+
+    async function sendToSQL(event, table) {
+        event.preventDefault();
+        const data = Object.fromEntries(new FormData(event.target));
+        console.log(`Enviando para ${table}:`, data);
+        alert(`SafeControl: Dados prontos para o SQL Server (Tabela: ${table})`);
+    }
+
+    setInterval(() => {
+        document.getElementById('clock').textContent = new Date().toLocaleTimeString('pt-BR');
+    }, 1000);
+</script>
+</body>
+</html>

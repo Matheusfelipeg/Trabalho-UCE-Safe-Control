@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeControl · Login Administrativo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #154c9c;
+            --bg-light: #e9ecef;
+            --text-dark: #333;
+            --white: #ffffff;
+            --border-color: #dee2e6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-wrapper {
+            display: flex;
+            width: 100%;
+            max-width: 850px;
+            height: 500px;
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .login-sidebar {
+            background-color: var(--primary-blue);
+            width: 35%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .logo-box {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+        .logo-box span { font-style: italic; font-weight: 400; }
+        .sidebar-tagline { font-size: 0.8rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+
+        .login-content {
+            flex: 1;
+            padding: 3.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-content h2 {
+            color: var(--primary-blue);
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary-blue);
+            display: inline-block;
+            width: fit-content;
+            padding-bottom: 5px;
+        }
+
+        .input-group { margin-bottom: 1.2rem; }
+        
+        label { 
+            display: block; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            color: #666; 
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            background-color: #f8f9fa;
+            outline: none;
+        }
+
+        /* O botão agora é do tipo submit para disparar a ação do form */
+        .btn-login {
+            width: 100%;
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.2s;
+        }
+        .btn-login:hover { background-color: #0d3a7a; }
+
+        @media (max-width: 600px) {
+            .login-sidebar { display: none; }
+            .login-wrapper { max-width: 90%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="login-sidebar">
+            <div class="logo-box">SAFE<br><span>+ Ctrl</span></div>
+            <div class="sidebar-tagline">Gestão de Entrega de EPI</div>
+        </div>
+
+        <div class="login-content">
+            <h2>Acesso ao Sistema</h2>
+            
+            <form action="principal.html" method="GET">
+                <div class="input-group">
+                    <label>Login</label>
+                    <input type="text" name="usuario" placeholder="Usuário" required>
+                </div>
+                <div class="input-group">
+                    <label>Senha de Acesso</label>
+                    <input type="password" name="senha" placeholder="••••••••" required>
+                </div>
+                
+                <button type="submit" class="btn-login">LOGIN</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
