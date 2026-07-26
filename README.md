@@ -21,7 +21,7 @@ Plataforma desenvolvida para otimizar a gestão de Equipamentos de Proteção In
 
 ---
 
-# 📖 Sobre o Projeto
+# Sobre o Projeto 🦺
 
 O **SafeControl** foi desenvolvido para solucionar uma demanda real da indústria relacionada à gestão de Equipamentos de Proteção Individual (EPIs).
 
@@ -102,7 +102,7 @@ Dashboard e Indicadores
 
 ---
 
-# 📊 Dashboard Power BI
+# Dashboard Power BI
 
 O principal diferencial do projeto é o painel analítico desenvolvido no Power BI.
 
@@ -135,7 +135,7 @@ Dashboard
 
 ---
 
-# 🗄 Banco de Dados
+# Banco de Dados
 
 Toda a plataforma foi desenvolvida utilizando um banco de dados relacional responsável por armazenar todas as informações do sistema.
 
@@ -165,7 +165,7 @@ Modelo de Dados
 
 ---
 
-# 👨‍💼 Cadastro de Funcionários
+# Cadastro de Funcionários
 
 Módulo responsável pelo gerenciamento dos colaboradores.
 
@@ -191,7 +191,7 @@ Cadastro de Funcionários
 
 ---
 
-# 🦺 Cadastro de EPIs
+# Cadastro de EPIs
 
 Permite realizar o gerenciamento completo dos equipamentos.
 
@@ -216,7 +216,7 @@ Cadastro de EPIs
 
 ---
 
-# 📦 Cadastro de Compras
+# Cadastro de Compras
 
 Responsável pelo controle dos lotes de equipamentos.
 
@@ -241,7 +241,7 @@ Cadastro de Compras
 
 ---
 
-# 📋 Registro de Entregas
+# Registro de Entregas
 
 Permite registrar cada entrega realizada aos colaboradores.
 
@@ -269,7 +269,7 @@ Registro de Entregas
 
 ---
 
-# 🛠 Tecnologias Utilizadas
+# Tecnologias Utilizadas
 
 - Power BI
 - SQL
@@ -278,24 +278,6 @@ Registro de Entregas
 - CSS
 - JavaScript
 - Bootstrap
-
----
-
-# 📊 Competências Demonstradas
-
-Este projeto evidencia competências voltadas para a área de Dados e Business Intelligence.
-
-- Modelagem de Dados
-- Banco de Dados Relacional
-- SQL
-- Business Intelligence
-- Power BI
-- Desenvolvimento de Dashboards
-- Construção de KPIs
-- Integração entre Sistema e Banco de Dados
-- Organização de Dados Operacionais
-- Visualização de Dados
-- Suporte à Tomada de Decisão
 
 ---
 
