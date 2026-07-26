@@ -64,6 +64,32 @@ Entre as principais funcionalidades estão:
 
 ---
 
+# 📈 Fluxo da Informação
+
+```text
+Funcionários
+      │
+      ▼
+Cadastro de EPIs
+      │
+      ▼
+Registro de Compras
+      │
+      ▼
+Registro de Entregas
+      │
+      ▼
+Banco de Dados
+      │
+      ▼
+Power BI
+      │
+      ▼
+Dashboard e Indicadores
+```
+
+---
+
 # 📊 Dashboard Power BI
 
 O principal diferencial do projeto é o painel analítico desenvolvido no Power BI.
@@ -231,32 +257,6 @@ Registro de Entregas
 
 ---
 
-# 📈 Fluxo da Informação
-
-```text
-Funcionários
-      │
-      ▼
-Cadastro de EPIs
-      │
-      ▼
-Registro de Compras
-      │
-      ▼
-Registro de Entregas
-      │
-      ▼
-Banco de Dados
-      │
-      ▼
-Power BI
-      │
-      ▼
-Dashboard e Indicadores
-```
-
----
-
 # 🛠 Tecnologias Utilizadas
 
 - Power BI
@@ -284,18 +284,6 @@ Este projeto evidencia competências voltadas para a área de Dados e Business I
 - Organização de Dados Operacionais
 - Visualização de Dados
 - Suporte à Tomada de Decisão
-
----
-
-# 🚀 Próximas Melhorias
-
-- Alertas automáticos de vencimento
-- Envio de notificações
-- QR Code para EPIs
-- Controle por código de barras
-- Relatórios PDF
-- Controle de usuários
-- Histórico completo das movimentações
 
 ---
 
