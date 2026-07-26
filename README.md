@@ -64,6 +64,17 @@ Entre as principais funcionalidades estão:
 
 ---
 
+<p align="center">
+
+<a href="https://matheusfelipeg.github.io/Trabalho-UCE-Safe-Control/principal.html?usuario=admin%40safectrl.com&senha=Login">
+<img src="https://img.shields.io/badge/Acessar%20Projeto-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white">
+</a>
+
+</p>
+
+> **Observação:** Como o projeto está hospedado no GitHub Pages, a autenticação foi simplificada para fins de demonstração. O link acima realiza o acesso automaticamente ao ambiente de testes.
+---
+
 # 📈 Fluxo da Informação
 
 ```text
